@@ -222,19 +222,19 @@ static FilterType get_filter_type_for_filename(String filename) {
     }
 }
 
-static void close_output_streams(FilterType filter_type) {
+static void discard_output_streams(FilterType filter_type) {
     switch (filter_type) {
         case FilterType_Stdout: {
-            fclose(stdout);
+            freopen("/dev/null", "w", stdout);
         } break;
 
         case FilterType_Stderr: {
-            fclose(stderr);
+            freopen("/dev/null", "w", stderr);
         } break;
 
         case FilterType_All: {
-            fclose(stdout);
-            fclose(stderr);
+            freopen("/dev/null", "w", stdout);
+            freopen("/dev/null", "w", stderr);
         } break;
 
         case FilterType_None: {}
@@ -280,7 +280,7 @@ void setup(void) {
 
     FilterType filter_type = get_filter_type_for_filename(filename);
     if (filter_type != FilterType_None) {
-        close_output_streams(filter_type);
+        discard_output_streams(filter_type);
     }
 }
 
@@ -294,7 +294,7 @@ int execve(const char *filename, const char *argv[], const char *envp[]) {
     FilterType filter_type = get_filter_type_for_filename(filename_string);
 
     if (filter_type != FilterType_None) {
-        close_output_streams(filter_type);
+        discard_output_streams(filter_type);
     }
 
     return real_execve(filename, argv, envp);
